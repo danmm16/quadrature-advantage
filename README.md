@@ -67,11 +67,11 @@ The same Sobolev framework applied at O(h^7) accuracy: imposes 7 moment conditio
 
 This file provides the fair methodological comparison against `quadrature_h7.py`: same accuracy order, same exponential fitting, with and without Sobolev smoothing.
 
-Two stencil sizes are of particular interest:
+Tested across H=8 to H=16 (1 to 9 free parameters). Two stencil sizes are of particular interest:
 
-**H=8 (Option A -- minimum stencil, 1 free parameter)**: the Sobolev penalty has almost no room to act. Improvement over the pseudoinverse baseline is only 0.10%. Weights are comparable to `quadrature_h7.py` with a slight smoothing effect.
+**H=8 (minimum stencil, 1 free parameter)**: the Sobolev penalty has almost no room to act. Improvement over the pseudoinverse baseline is only 0.10%. Weights are comparable to `quadrature_h7.py` with a slight smoothing effect.
 
-**H=11 (Option B -- recommended, 4 free parameters)**: the Sobolev penalty has meaningful influence. Improvement over baseline peaks at 1.89% -- the largest improvement across the full H=8 to H=16 sweep. Beyond H=11 the improvement declines as the wider window gives the pseudoinverse more room to find a smooth solution on its own.
+**H=11 (recommended, 4 free parameters)**: the Sobolev penalty has meaningful influence. Improvement over baseline peaks at 1.89% -- the largest improvement across the full H=8 to H=16 sweep. Beyond H=11 the improvement declines as the wider window gives the pseudoinverse more room to find a smooth solution on its own.
 
 ### Test files
 
@@ -101,7 +101,7 @@ Both quadrature methods are at floating-point noise. GAE error of 0.966 on a cub
 
 All errors are relative to each method's true integral over its own window. $\gamma=0.99$, $\lambda=0.95$:
 
-| Function | `quadrature_h7` (H=7) | `sobolev_h7` A (H=8) | `sobolev_h7` B (H=11) | GAE (H=7) |
+| Function | `quadrature_h7` (H=7) | `sobolev_h7` (H=8) | `sobolev_h7` (H=11) | GAE (H=7) |
 |---|---|---|---|---|
 | Constant | 1.25e-08 | 1.74e-08 | 9.53e-09 | 1.69e-01 |
 | Linear | 6.18e-09 | 1.86e-08 | 5.04e-09 | 1.44e-01 |
@@ -158,7 +158,7 @@ w_h4 = simpson_sobolev_weights(gamma=0.99, lam=0.95, H=5, mu0=1.0, mu1=1.0, mu2=
 # O(h^7) unconstrained weights -- maximum accuracy for smooth TD residuals
 w_h7 = quadrature_weights(gamma=0.99, lam=0.95, H=7)
 
-# O(h^7) Sobolev weights -- H=11 recommended (peak smoothing improvement)
+# O(h^7) Sobolev weights -- H=11 recommended (peak smoothing at 1.89% improvement)
 w_ss7 = simpson_sobolev_h7_weights(gamma=0.99, lam=0.95, H=11, mu0=1.0, mu1=1.0, mu2=1.0)
 
 # Apply to a window of TD residuals
@@ -193,8 +193,7 @@ which correspond to a forward-Euler approximation of the discounted integral -- 
 | GAE | O(h^1) | unbounded | -- | Standard; no stencil width |
 | `sobolev_h4` | O(h^4) | H >= 5 | H - 4 | Smooth weights; noise-robust |
 | `quadrature_h7` | O(h^7) | 7 | 0 | Maximum accuracy; no smoothing |
-| `sobolev_h7` (A) | O(h^7) | 8 | 1 | Minimal Sobolev; effect small |
-| `sobolev_h7` (B) | O(h^7) | 11 | 4 | Recommended; peak smoothing |
+| `sobolev_h7` | O(h^7) | 8--16 | H - 7 | H=11 recommended; peak smoothing |
 
 ---
 
