@@ -61,7 +61,7 @@ where $R = \mu_0 S + \mu_1 L_1^\top S_1 L_1 + \mu_2 L_2^\top S_2 L_2$ is symmetr
 
 Minimum stencil: $H = 5$ (one free parameter). $H = 7$ gives three free parameters and stronger smoothing.
 
-### `sobolev_h7.py` -- O(h^7) with Simpson-Sobolev regularization
+### `sobolev_h7.py` -- $O(h^7)$ with Simpson-Sobolev regularization
 
 The same Sobolev framework applied at $O(h^7)$ accuracy: imposes 7 moment conditions (exactness up to degree 6), leaving $H - 7$ free parameters. Requires $H \geq 8$.
 
@@ -71,7 +71,7 @@ Tested across $H=8$ to $H=16$ ($1$ to $9$ free parameters). Two stencil sizes ar
 
 **H=8 (minimum stencil, 1 free parameter)**: the Sobolev penalty has almost no room to act. Improvement over the pseudoinverse baseline is only 0.10%. Weights are comparable to `quadrature_h7.py` with a slight smoothing effect.
 
-**H=11 (recommended, 4 free parameters)**: the Sobolev penalty has meaningful influence. Improvement over baseline peaks at 1.89% -- the largest improvement across the full $H=8$ to $H=16$ sweep. Beyond H=11 the improvement declines as the wider window gives the pseudoinverse more room to find a smooth solution on its own.
+**H=11 (recommended, 4 free parameters)**: the Sobolev penalty has meaningful influence. Improvement over baseline peaks at 1.89% -- the largest improvement across the full $H=8$ to $H=16$ sweep. Beyond $H=11$ the improvement declines as the wider window gives the pseudoinverse more room to find a smooth solution on its own.
 
 ### Test files
 
@@ -231,7 +231,7 @@ If you use or build on this work:
 @misc{margolis2025qwae,
   author = {Margolis, Daniel},
   title  = {Quadrature-Weighted Advantage Estimation},
-  year   = {2025},
+  year   = {2026},
   url    = {https://github.com/danmm16/quadrature-advantage}
 }
 ```
