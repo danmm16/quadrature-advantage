@@ -190,10 +190,10 @@ which correspond to a forward-Euler approximation of the discounted integral -- 
 
 | Method | Accuracy | Stencil | Free params | Notes |
 |---|---|---|---|---|
-| GAE | O(h^1) | unbounded | -- | Standard; no stencil width |
-| `sobolev_h4` | O(h^4) | H >= 5 | H - 4 | Smooth weights; noise-robust |
-| `quadrature_h7` | O(h^7) | 7 | 0 | Maximum accuracy; no smoothing |
-| `sobolev_h7` | O(h^7) | 8--16 | H - 7 | H=11 recommended; peak smoothing |
+| GAE | $O(h^1)$ | unbounded | -- | Standard; no stencil width |
+| `sobolev_h4` | $O(h^4)$ | $H \geq 5$ | $H - 4$ | Smooth weights; noise-robust |
+| `quadrature_h7` | $O(h^7)$ | $H = 7$ | $0$ | Maximum accuracy; no smoothing |
+| `sobolev_h7` | $O(h^7)$ | $16 \geq H \geq 8$ | $H - 7$ | H=11 recommended; peak smoothing |
 
 ---
 
