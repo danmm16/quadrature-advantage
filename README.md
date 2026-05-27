@@ -1,6 +1,6 @@
 # Quadrature-Weighted Advantage Estimation
 
-Exponentially-fitted quadrature weights for computing Generalized Advantage Estimation (GAE) in reinforcement learning, with Simpson-Sobolev regularization variants that select smooth weights from families of O(h^4)- and O(h^7)-accurate solutions.
+Exponentially-fitted quadrature weights for computing Generalized Advantage Estimation (GAE) in reinforcement learning, with Simpson-Sobolev regularization variants that select smooth weights from families of $O(h^4)$- and $O(h^7)$-accurate solutions.
 
 ---
 
@@ -24,7 +24,7 @@ The implementations here answer that question at two accuracy orders, with and w
 
 ## Files
 
-### `quadrature_h7.py` -- O(h^7) exponentially-fitted quadrature
+### `quadrature_h7.py` -- $O(h^7)$ exponentially-fitted quadrature
 
 Computes weights that are exact for any TD residual function that is a polynomial of degree 6 or lower. This is the maximum achievable accuracy for a 7-node rule.
 
@@ -40,7 +40,7 @@ As $\gamma\lambda \to 1$ (no discount), the weights converge to the standard 7-p
 
 $$\mathbf{w} \to \frac{1}{140}[41,\ 216,\ 27,\ 272,\ 27,\ 216,\ 41]$$
 
-### `sobolev_h4.py` -- O(h^4) with Simpson-Sobolev regularization
+### `sobolev_h4.py` -- $O(h^4)$ with Simpson-Sobolev regularization
 
 Imposes only 4 moment conditions (exactness up to degree 3), leaving $H - 4$ free parameters determined by minimizing the Simpson-approximated $H^2$ Sobolev norm of the weight sequence:
 
@@ -63,23 +63,23 @@ Minimum stencil: $H = 5$ (one free parameter). $H = 7$ gives three free paramete
 
 ### `sobolev_h7.py` -- O(h^7) with Simpson-Sobolev regularization
 
-The same Sobolev framework applied at O(h^7) accuracy: imposes 7 moment conditions (exactness up to degree 6), leaving $H - 7$ free parameters. Requires $H \geq 8$.
+The same Sobolev framework applied at $O(h^7)$ accuracy: imposes 7 moment conditions (exactness up to degree 6), leaving $H - 7$ free parameters. Requires $H \geq 8$.
 
 This file provides the fair methodological comparison against `quadrature_h7.py`: same accuracy order, same exponential fitting, with and without Sobolev smoothing.
 
-Tested across H=8 to H=16 (1 to 9 free parameters). Two stencil sizes are of particular interest:
+Tested across $H=8$ to $H=16$ ($1$ to $9$ free parameters). Two stencil sizes are of particular interest:
 
 **H=8 (minimum stencil, 1 free parameter)**: the Sobolev penalty has almost no room to act. Improvement over the pseudoinverse baseline is only 0.10%. Weights are comparable to `quadrature_h7.py` with a slight smoothing effect.
 
-**H=11 (recommended, 4 free parameters)**: the Sobolev penalty has meaningful influence. Improvement over baseline peaks at 1.89% -- the largest improvement across the full H=8 to H=16 sweep. Beyond H=11 the improvement declines as the wider window gives the pseudoinverse more room to find a smooth solution on its own.
+**H=11 (recommended, 4 free parameters)**: the Sobolev penalty has meaningful influence. Improvement over baseline peaks at 1.89% -- the largest improvement across the full $H=8$ to $H=16$ sweep. Beyond H=11 the improvement declines as the wider window gives the pseudoinverse more room to find a smooth solution on its own.
 
 ### Test files
 
 | File | Tests |
 |---|---|
 | `quadrature_h7.py` (self-tests) | Newton-Cotes limiting case; polynomial exactness to relative error < 1e-6 for all 7 degrees; direct comparison against GAE |
-| `sobolev_test.py` | Polynomial exactness (O(h^4), H=5 and H=7); Sobolev optimality; positive weights; limiting case sum |
-| `sobolev_h7_test.py` | Polynomial exactness (O(h^7), H=8 through H=16); Sobolev optimality with improvement percentage; weight profiles; limiting case sum; cross-method accuracy comparison |
+| `sobolev_test.py` | Polynomial exactness ($O(h^4)$, $H=5$ and $H=7$); Sobolev optimality; positive weights; limiting case sum |
+| `sobolev_h7_test.py` | Polynomial exactness ($O(h^7)$, $H=8$ through $H=16$); Sobolev optimality with improvement percentage; weight profiles; limiting case sum; cross-method accuracy comparison |
 
 ---
 
@@ -91,17 +91,17 @@ With $\gamma=0.99$, $\lambda=0.95$, $\delta(t) = 1 + 0.3t - 0.05t^2 + 0.002t^3$:
 
 | Method | Relative error vs true integral |
 |---|---|
-| `quadrature_h7` (O(h^7), H=7) | 7.80e-08 |
-| `sobolev_h4` (O(h^4), H=7) | 3.38e-08 |
-| GAE (truncated at H=7) | 9.66e-01 |
+| `quadrature_h7` ($O(h^7)$, $H=7$) | 7.80e-08 |
+| `sobolev_h4` ($O(h^4)$, $H=7$) | 3.38e-08 |
+| GAE (truncated at $H=7$) | 9.66e-01 |
 
 Both quadrature methods are at floating-point noise. GAE error of 0.966 on a cubic polynomial reflects its first-order nature.
 
-### Cross-method accuracy comparison (O(h^7) methods)
+### Cross-method accuracy comparison ($O(h^7)$ methods)
 
 All errors are relative to each method's true integral over its own window. $\gamma=0.99$, $\lambda=0.95$:
 
-| Function | `quadrature_h7` (H=7) | `sobolev_h7` (H=8) | `sobolev_h7` (H=11) | GAE (H=7) |
+| Function | `quadrature_h7` ($H=7$) | `sobolev_h7` ($H=8$) | `sobolev_h7` ($H=11$) | GAE ($H=7$) |
 |---|---|---|---|---|
 | Constant | 1.25e-08 | 1.74e-08 | 9.53e-09 | 1.69e-01 |
 | Linear | 6.18e-09 | 1.86e-08 | 5.04e-09 | 1.44e-01 |
@@ -116,7 +116,7 @@ All three quadrature methods are effectively equivalent in accuracy -- all at ma
 
 Improvement of $J(\mathbf{w})$ relative to the minimum-Euclidean-norm pseudoinverse baseline:
 
-| H | Free params | Improvement |
+| $H$ | Free params | Improvement |
 |---|---|---|
 | 8 | 1 | 0.10% |
 | 9 | 2 | 1.33% |
@@ -128,7 +128,7 @@ Improvement of $J(\mathbf{w})$ relative to the minimum-Euclidean-norm pseudoinve
 | 15 | 8 | 0.72% |
 | 16 | 9 | 0.71% |
 
-H=11 is the empirically optimal stencil for this penalty structure at these RL parameters. The improvement peaks at four free parameters before diminishing returns set in as the wider window reduces the advantage the Sobolev penalty has over the unconstrained solution.
+$H=11$ is the empirically optimal stencil for this penalty structure at these RL parameters. The improvement peaks at four free parameters before diminishing returns set in as the wider window reduces the advantage the Sobolev penalty has over the unconstrained solution.
 
 ---
 
@@ -186,7 +186,7 @@ Standard GAE uses geometric-series weights:
 
 $$w_k^{\text{GAE}} = (\gamma\lambda)^k$$
 
-which correspond to a forward-Euler approximation of the discounted integral -- O(h^1) accurate. The implementations here replace this with:
+which correspond to a forward-Euler approximation of the discounted integral -- $O(h^1)$ accurate. The implementations here replace this with:
 
 | Method | Accuracy | Stencil | Free params | Notes |
 |---|---|---|---|---|
