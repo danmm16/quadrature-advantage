@@ -85,9 +85,78 @@ def test_limiting_case(H=5):
     print("  ✓\n")
 
 
+from quadrature_h7 import quadrature_weights
+
+def test_accuracy_comparison(gamma=0.99, lam=0.95):
+    """
+    Compare approximation error of simpson_h4 (O(h^7)) vs sobolev_h4 (O(h^4))
+    vs standard GAE on several TD residual functions.
+
+    simpson_h4 should be exact for polynomials up to degree 6.
+    sobolev_h4 should be exact for polynomials up to degree 3.
+    GAE should be poor for all of them over a fixed window.
+    """
+    alpha = -np.log(gamma * lam)
+    H = 7  # use H=7 for both so the comparison is fair (same stencil width)
+
+    w_h7 = np.array(quadrature_weights(gamma, lam, H=7))
+    w_ss = np.array(simpson_sobolev_weights(gamma, lam, H=7))
+
+    t = np.arange(H, dtype=np.float64)
+    M = compute_moments(alpha, order=H, N=float(H - 1))
+
+    # GAE weights (geometric series, truncated at H)
+    w_gae = np.array([(gamma * lam) ** k for k in range(H)])
+
+    test_cases = {
+        "constant (degree 0)":  (np.ones(H),          M[0]),
+        "linear (degree 1)":    (t,                    M[1]),
+        "quadratic (degree 2)": (t ** 2,               M[2]),
+        "cubic (degree 3)":     (t ** 3,               M[3]),
+        "degree 4":             (t ** 4,               M[4]),
+        "degree 6":             (t ** 6,               M[6]),
+        "mixed polynomial":     (
+            1.0 + 0.3*t - 0.05*t**2 + 0.002*t**3,
+            1.0*M[0] + 0.3*M[1] - 0.05*M[2] + 0.002*M[3]
+        ),
+        "exponential":          (
+            np.exp(-0.1 * t),
+            compute_moments(alpha + 0.1, order=1, N=float(H - 1))[0]
+        ),
+    }
+
+    print(f"\nAccuracy comparison (gamma={gamma}, lam={lam}, H={H}):")
+    print(f"{'Function':<25} {'simpson_h4':>14} {'sobolev_h4':>14} {'GAE':>14}")
+    print("-" * 70)
+
+    for name, (delta, true_val) in test_cases.items():
+        err_h7  = abs(np.dot(w_h7,  delta) - true_val)
+        err_ss  = abs(np.dot(w_ss,  delta) - true_val)
+        err_gae = abs(np.dot(w_gae, delta) - true_val)
+        print(f"{name:<25} {err_h7:>14.2e} {err_ss:>14.2e} {err_gae:>14.2e}")
+
+    print()
+
+    # Assertions: simpson_h4 exact up to degree 6, sobolev_h4 exact up to degree 3
+    for j in range(7):
+        delta    = t ** j
+        true_val = M[j]
+        err_h7   = abs(np.dot(w_h7, delta) - true_val) / abs(true_val)
+        assert err_h7 < 1e-5, f"simpson_h4 failed exactness at degree {j}: rel_err={err_h7}"
+
+    for j in range(4):
+        delta    = t ** j
+        true_val = M[j]
+        err_ss   = abs(np.dot(w_ss, delta) - true_val) / abs(true_val)
+        assert err_ss < 1e-5, f"sobolev_h4 failed exactness at degree {j}: rel_err={err_ss}"
+
+    print("Exactness assertions ✓")
+
+
 if __name__ == "__main__":
     for H in [5, 7]:
         test_polynomial_exactness(H=H)
         test_sobolev_beats_unconstrained(H=H)
         test_monotone_decay(H=H)
         test_limiting_case(H=H)
+    test_accuracy_comparison()
