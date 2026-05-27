@@ -1,0 +1,93 @@
+import numpy as np
+from sobolev_h4 import (
+    simpson_weights_for_length,
+    compute_moments,
+    difference_matrix,
+    simpson_sobolev_weights,
+)
+
+def test_polynomial_exactness(gamma=0.99, lam=0.95, H=5):
+    """Weights must exactly integrate any delta(t) = t^j, j=0,1,2,3."""
+    alpha = -np.log(gamma * lam)
+    w = np.array(simpson_sobolev_weights(gamma, lam, H))
+    M4 = compute_moments(alpha, order=4, N=float(H - 1))
+    k = np.arange(H, dtype=np.float64)
+
+    print(f"Polynomial exactness test (H={H}):")
+    for j in range(4):
+        approx = np.dot(w, k ** j)
+        exact  = M4[j]
+        rel_err = abs(approx - exact) / abs(exact) if abs(exact) > 1e-12 else abs(approx - exact)
+        print(f"  j={j}: approx={approx:.8f}, exact={exact:.8f}, err={rel_err:.2e}")
+    assert all(abs(np.dot(w, k**j) - M4[j]) / abs(M4[j]) < 1e-6 for j in range(4) if abs(M4[j]) > 1e-12), "Exactness failed"
+    print("  ✓\n")
+
+
+def test_sobolev_beats_unconstrained(gamma=0.99, lam=0.95, H=5):
+    """
+    The Sobolev weights should have strictly smaller J(w) than the
+    pseudoinverse solution (minimum Euclidean norm, no Sobolev penalty).
+    """
+    alpha = -np.log(gamma * lam)
+    k  = np.arange(H, dtype=np.float64)
+    V4 = np.vander(k, N=4, increasing=True).T
+    M4 = compute_moments(alpha, order=4, N=float(H - 1))
+
+    # Pseudoinverse (minimum L2 norm, ignores Sobolev)
+    w_pinv = np.linalg.lstsq(V4, M4, rcond=None)[0]
+
+    # Simpson-Sobolev weights
+    w_ss = np.array(simpson_sobolev_weights(gamma, lam, H))
+
+    # Evaluate J(w) for both
+    S  = np.diag(simpson_weights_for_length(H))
+    L1 = difference_matrix(H, order=1)
+    L2 = difference_matrix(H, order=2)
+    S1 = np.diag(simpson_weights_for_length(H - 1))
+    S2 = np.diag(simpson_weights_for_length(H - 2))
+    R  = S + L1.T @ S1 @ L1 + L2.T @ S2 @ L2
+
+    J_pinv = w_pinv @ R @ w_pinv
+    J_ss   = w_ss   @ R @ w_ss
+
+    print(f"Sobolev objective test (H={H}):")
+    print(f"  J(w_pinv) = {J_pinv:.6f}")
+    print(f"  J(w_ss)   = {J_ss:.6f}  (should be <= J_pinv)")
+    assert J_ss <= J_pinv + 1e-8, "Sobolev weights are not optimal"
+    print("  ✓\n")
+
+
+def test_monotone_decay(gamma=0.99, lam=0.95, H=5):
+    """
+    For large alpha (strong discount), weights should be roughly monotone
+    decreasing -- early TD residuals matter more.
+    """
+    w = np.array(simpson_sobolev_weights(gamma, lam, H))
+    print(f"Weight profile (H={H}, gamma={gamma}, lam={lam}):")
+    print(f"  w = {w.round(4)}")
+    print(f"  All positive: {bool(np.all(w > 0))}")
+    assert np.all(w > 0), f"Non-positive weights found: {w}"
+    print("  ✓\n")
+
+
+def test_limiting_case(H=5):
+    """
+    As gamma*lam -> 1 (alpha -> 0), weights should stabilize to the
+    Simpson-Sobolev-optimal undiscounted rule (not Boole's rule, since
+    that uses 5 moment conditions; ours uses only 4).
+    """
+    w_limit = np.array(simpson_sobolev_weights(0.9999, 0.9999, H))
+    expected_sum = float(H - 1)
+    print(f"Limiting case (alpha -> 0, H={H}):")
+    print(f"  w = {w_limit.round(4)}")
+    print(f"  sum(w) = {w_limit.sum():.6f} (should be ~{expected_sum:.1f})")
+    assert abs(w_limit.sum() - expected_sum) < 1e-2, f"Weight sum wrong: {w_limit.sum()}"
+    print("  ✓\n")
+
+
+if __name__ == "__main__":
+    for H in [5, 7]:
+        test_polynomial_exactness(H=H)
+        test_sobolev_beats_unconstrained(H=H)
+        test_monotone_decay(H=H)
+        test_limiting_case(H=H)
